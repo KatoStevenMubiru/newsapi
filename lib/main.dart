@@ -9,21 +9,18 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       home: HomePage(),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+  const HomePage({Key? key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -31,16 +28,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ApiService client = ApiService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:Text("News App", style: TextStyle(color: Colors.black)),
+        title: Text(
+          "News App",
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
       ),
-
       body: FutureBuilder(
-        future: client.getArticle(),
+        future: client.getArticles(), // Updated method call
         builder: (BuildContext context, AsyncSnapshot<List<Article>> snapshot) {
           if (snapshot.hasData) {
             List<Article> articles = snapshot.data!;
@@ -48,20 +48,18 @@ class _HomePageState extends State<HomePage> {
               itemCount: articles.length,
               itemBuilder: (context, index) => customListTile(articles[index]),
             );
-          }else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             // Display the error message
             return Center(
               child: Text('Error: ${snapshot.error}'),
             );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
-          else{
-          return Center(
-            child: CircularProgressIndicator(),
-          );}
         },
       ),
-
     );
   }
 }
-
