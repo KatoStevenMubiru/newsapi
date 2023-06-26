@@ -39,27 +39,35 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: FutureBuilder(
-        future: client.getArticles(), // Updated method call
+      body: FutureBuilder<List<Article>>(
+        future: _loadArticles(),
         builder: (BuildContext context, AsyncSnapshot<List<Article>> snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
             List<Article> articles = snapshot.data!;
             return ListView.builder(
               itemCount: articles.length,
               itemBuilder: (context, index) => customListTile(articles[index]),
             );
-          } else if (snapshot.hasError) {
-            // Display the error message
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
           }
         },
       ),
     );
+  }
+
+  Future<List<Article>> _loadArticles() async {
+    final List<Article> articles = await client.getArticlesFromDatabase();
+    if (articles.isNotEmpty) {
+      return articles;
+    } else {
+      return client.getArticles();
+    }
   }
 }
